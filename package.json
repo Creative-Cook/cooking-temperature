@@ -1,15 +1,15 @@
 {
   "name": "cooking-temperature",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A comprehensive library for safe cooking temperatures, doneness levels, and cooking instructions for various ingredients",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     }
   },
   "files": [
@@ -34,7 +34,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "git+https://github.com/Creative-Cook/cooking-temperature.git"
   },
   "devDependencies": {
     "tsup": "^8.5.1",
