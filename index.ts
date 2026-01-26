@@ -56,6 +56,23 @@ export const getAllCategories = (): IngredientCategory[] => {
 	return [...new Set(ALL_ENTRIES.map(entry => entry.category))]
 }
 
+const CATEGORY_NAMES: Record<IngredientCategory, string> = {
+	poultry: "Poultry",
+	beef: "Beef",
+	pork: "Pork",
+	lamb: "Lamb",
+	seafood_fish: "Fish",
+	seafood_shellfish: "Shellfish",
+	egg: "Eggs",
+	vegetable: "Vegetables",
+	grain: "Grains",
+	legume: "Legumes",
+}
+
+export const getCategoryName = (category: IngredientCategory): string => {
+	return CATEGORY_NAMES[category]
+}
+
 // Temperature utilities
 export const convertTemperature = (
 	temp: number,
