@@ -1,8 +1,12 @@
 # Changelog
 
+## [1.0.5] - 2025-01-28
+### Changed
+- Updated icons to use microsoft icons for better consistency.
+
 ## [1.0.4] - 2025-01-28
 ### Changed
-- Updatedd icons in the icons module to improve visual clarity.
+- Updated icons in the icons module to improve visual clarity.
 
 ## [1.0.3] - 2025-01-28
 
