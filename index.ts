@@ -76,11 +76,11 @@ export const getCategoryName = (category: IngredientCategory): string => {
 // Temperature utilities
 export const convertTemperature = (
 	temp: number,
-	from: TemperatureUnit,
-	to: TemperatureUnit
+	from_unit: TemperatureUnit,
+	to_unit: TemperatureUnit
 ): number => {
-	if (from === to) return temp
-	return from === "F"
+	if (from_unit === to_unit) return temp
+	return from_unit === "F"
 		? Math.round((temp - 32) * (5 / 9))
 		: Math.round(temp * (9 / 5) + 32)
 }
@@ -109,13 +109,13 @@ export const getSafeMinimumTemp = (
 
 export const getDonenessTemp = (
 	ingredientId: string,
-	doneness: DonenessLevel,
+	doneness_level: DonenessLevel,
 	unit: TemperatureUnit = "F"
 ): number | undefined => {
 	const entry = ALL_ENTRIES.find(e => e.id === ingredientId)
 	if (!entry || !entry.donenessLevels) return undefined
 
-	const level = entry.donenessLevels.find(d => d.level === doneness)
+	const level = entry.donenessLevels.find(d => d.level === doneness_level)
 	if (!level) return undefined
 
 	return unit === level.internalTempUnit
@@ -138,7 +138,7 @@ export const getCookingMethods = (ingredientId: string): CookingMethod[] => {
 
 export const getCookingInstruction = (
 	ingredientId: string,
-	method: CookingMethod,
+	cooking_method: CookingMethod,
 	portionHint?: string
 ):
 	| {
@@ -163,7 +163,7 @@ export const getCookingInstruction = (
 
 	if (!portion) return undefined
 
-	const instruction = portion.methods.find(m => m.method === method)
+	const instruction = portion.methods.find(m => m.method === cooking_method)
 	if (!instruction) return undefined
 
 	return {
@@ -178,7 +178,7 @@ export const getCookingInstruction = (
 // Quick reference function - the main use case you described
 export const getQuickReference = (
 	query: string,
-	method?: CookingMethod,
+	cooking_method?: CookingMethod,
 	unit: TemperatureUnit = "F"
 ):
 	| {
@@ -216,11 +216,11 @@ export const getQuickReference = (
 		  }
 		| undefined
 
-	if (method) {
-		const instruction = getCookingInstruction(entry.id, method)
+	if (cooking_method) {
+		const instruction = getCookingInstruction(entry.id, cooking_method)
 		if (instruction) {
 			suggestedMethod = {
-				method,
+				method: cooking_method,
 				applianceTemp:
 					unit === instruction.applianceTempUnit
 						? instruction.applianceTemp
