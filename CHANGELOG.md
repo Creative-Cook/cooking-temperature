@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.4] - 2025-01-28
+### Changed
+- Updatedd icons in the icons module to improve visual clarity.
+
 ## [1.0.3] - 2025-01-28
 
 ### Added
