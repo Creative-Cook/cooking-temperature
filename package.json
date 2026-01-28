@@ -1,6 +1,6 @@
 {
   "name": "cooking-temperature",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A comprehensive library for safe cooking temperatures, doneness levels, and cooking instructions for various ingredients",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -10,6 +10,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
+    },
+    "./icons": {
+      "types": "./dist/icons.d.ts",
+      "import": "./dist/icons.mjs",
+      "require": "./dist/icons.js"
     }
   },
   "files": [
