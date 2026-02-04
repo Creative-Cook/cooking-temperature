@@ -3,15 +3,14 @@
 A comprehensive library for safe cooking temperatures, doneness levels, and cooking instructions for various ingredients.
 
 ## Installation
-
 ```bash
 npm install cooking-temperature
 ```
 
 ## Usage
-
 ```typescript
 import {
+  search,
   findByName,
   findById,
   findByCategory,
@@ -25,6 +24,14 @@ import {
   getCookingInstruction,
   convertTemperature,
 } from "cooking-temperature"
+
+// Search for ingredients
+const results = search("chicken")
+// Returns: CookingTemperatureEntry[] (all entries matching "chicken")
+
+// Search with options
+const limitedResults = search("pork", { category: "pork", limit: 3 })
+// Returns: up to 3 pork entries matching "pork"
 
 // Quick reference lookup
 const chicken = getQuickReference("chicken breast", "oven_bake")
@@ -86,7 +93,6 @@ const celsius = convertTemperature(165, "F", "C")
 ## API
 
 ### Types
-
 ```typescript
 type TemperatureUnit = "F" | "C"
 
@@ -105,12 +111,32 @@ type CookingMethod =
   | "sous_vide" | "air_fry" | "deep_fry" | "slow_cook"
 ```
 
-### Lookup Functions
+### Search & Lookup Functions
+
+#### `search(query: string, options?: { category?: IngredientCategory; limit?: number }): CookingTemperatureEntry[]`
+
+Search for ingredients by name or alias. Returns results sorted by relevance (exact matches first, then name matches, then alias matches).
+```typescript
+// Basic search - returns all matches
+const results = search("chicken")
+// Returns: [Chicken Breast, Chicken Thigh, ...]
+
+// Filter by category
+const fishResults = search("fillet", { category: "seafood_fish" })
+// Returns: [Salmon Fillet, Cod Fillet]
+
+// Limit results (useful for autocomplete)
+const topResults = search("sal", { limit: 5 })
+// Returns: up to 5 matching entries
+
+// Combine options
+const porkChops = search("chop", { category: "pork", limit: 3 })
+// Returns: up to 3 pork entries matching "chop"
+```
 
 #### `findByName(query: string): CookingTemperatureEntry | undefined`
 
-Find an ingredient by name or alias (case-insensitive partial match).
-
+Find the first ingredient matching a name or alias (case-insensitive partial match).
 ```typescript
 const entry = findByName("ribeye")
 // Returns full CookingTemperatureEntry object or undefined
@@ -119,16 +145,14 @@ const entry = findByName("ribeye")
 #### `findById(id: string): CookingTemperatureEntry | undefined`
 
 Find an ingredient by its exact unique ID.
-
 ```typescript
-const entry = findById("beef-steak-ribeye")
+const entry = findById("beef_steak_ribeye")
 // Returns full CookingTemperatureEntry object or undefined
 ```
 
 #### `findByCategory(category: IngredientCategory): CookingTemperatureEntry[]`
 
 Get all ingredients in a category.
-
 ```typescript
 const poultryItems = findByCategory("poultry")
 // Returns: CookingTemperatureEntry[] (all poultry entries)
@@ -137,7 +161,6 @@ const poultryItems = findByCategory("poultry")
 #### `getAllEntries(): CookingTemperatureEntry[]`
 
 Get all cooking temperature entries in the library.
-
 ```typescript
 const all = getAllEntries()
 // Returns: CookingTemperatureEntry[] (all entries)
@@ -146,7 +169,6 @@ const all = getAllEntries()
 #### `getAllCategories(): IngredientCategory[]`
 
 Get all available categories.
-
 ```typescript
 const categories = getAllCategories()
 // Returns: ["poultry", "beef", "pork", "seafood_fish", "seafood_shellfish", "egg", "vegetable", "grain"]
@@ -155,7 +177,6 @@ const categories = getAllCategories()
 #### `getCategoryName(category: IngredientCategory): string`
 
 Get the human-readable display name for a category.
-
 ```typescript
 const name = getCategoryName("seafood_fish")
 // Returns: "Fish"
@@ -169,7 +190,6 @@ const name2 = getCategoryName("seafood_shellfish")
 #### `convertTemperature(temp: number, from_unit: TemperatureUnit, to_unit: TemperatureUnit): number`
 
 Convert between Fahrenheit and Celsius.
-
 ```typescript
 const celsius = convertTemperature(165, "F", "C")
 // Returns: 74
@@ -181,30 +201,28 @@ const fahrenheit = convertTemperature(74, "C", "F")
 #### `getSafeMinimumTemp(ingredientId: string, unit?: TemperatureUnit): { temp: number; restMinutes: number } | undefined`
 
 Get USDA safe minimum internal temperature for an ingredient.
-
 ```typescript
-const safeTemp = getSafeMinimumTemp("chicken-breast", "F")
+const safeTemp = getSafeMinimumTemp("chicken_breast_boneless", "F")
 // Returns: { temp: 165, restMinutes: 0 }
 
-const beefTemp = getSafeMinimumTemp("beef-steak-ribeye", "F")
+const beefTemp = getSafeMinimumTemp("beef_steak_ribeye", "F")
 // Returns: { temp: 145, restMinutes: 3 }
 
-const inCelsius = getSafeMinimumTemp("chicken-breast", "C")
+const inCelsius = getSafeMinimumTemp("chicken_breast_boneless", "C")
 // Returns: { temp: 74, restMinutes: 0 }
 ```
 
 #### `getDonenessTemp(ingredientId: string, doneness_level: DonenessLevel, unit?: TemperatureUnit): number | undefined`
 
 Get internal temperature for a specific doneness level.
-
 ```typescript
-const rare = getDonenessTemp("beef-steak-ribeye", "rare", "F")
+const rare = getDonenessTemp("beef_steak_ribeye", "rare", "F")
 // Returns: 125
 
-const mediumRare = getDonenessTemp("beef-steak-ribeye", "medium_rare", "F")
+const mediumRare = getDonenessTemp("beef_steak_ribeye", "medium_rare", "F")
 // Returns: 135
 
-const medium = getDonenessTemp("beef-steak-ribeye", "medium", "C")
+const medium = getDonenessTemp("beef_steak_ribeye", "medium", "C")
 // Returns: 60
 ```
 
@@ -213,21 +231,19 @@ const medium = getDonenessTemp("beef-steak-ribeye", "medium", "C")
 #### `getCookingMethods(ingredientId: string): CookingMethod[]`
 
 Get available cooking methods for an ingredient.
-
 ```typescript
-const methods = getCookingMethods("salmon-fillet")
+const methods = getCookingMethods("salmon_fillet")
 // Returns: ["oven_bake", "pan_sear", "grill", "poach", "sous_vide"]
 
-const chickenMethods = getCookingMethods("chicken-breast")
+const chickenMethods = getCookingMethods("chicken_breast_boneless")
 // Returns: ["oven_bake", "pan_sear", "grill", "poach", "sous_vide", "air_fry"]
 ```
 
 #### `getCookingInstruction(ingredientId: string, cooking_method: CookingMethod, portionHint?: string): object | undefined`
 
 Get detailed cooking instructions for a specific method.
-
 ```typescript
-const instructions = getCookingInstruction("salmon-fillet", "oven_bake")
+const instructions = getCookingInstruction("salmon_fillet", "oven_bake")
 // Returns:
 // {
 //   applianceTemp: 400,
@@ -238,14 +254,13 @@ const instructions = getCookingInstruction("salmon-fillet", "oven_bake")
 // }
 
 // With portion hint for specific cuts
-const thickCut = getCookingInstruction("beef-steak-ribeye", "grill", "1.5 inch")
+const thickCut = getCookingInstruction("beef_steak_ribeye", "grill", "1.5 inch")
 // Returns instructions for 1.5 inch thick steak
 ```
 
 #### `getQuickReference(query: string, cooking_method?: CookingMethod, unit?: TemperatureUnit): object | undefined`
 
 Get a quick reference with all relevant cooking info combined.
-
 ```typescript
 const ref = getQuickReference("chicken breast", "oven_bake", "F")
 // Returns:
@@ -322,42 +337,6 @@ For proteins that support doneness preferences:
 | `air_fry` | Circulating hot air |
 | `deep_fry` | Submerged in hot oil |
 | `slow_cook` | Low temperature, long duration |
-
-## Icons
-
-The library includes SVG icons as base64-encoded data URLs for categories and common ingredients.
-
-```typescript
-import {
-  CATEGORY_ICONS,
-  INGREDIENT_ICONS,
-  getIcon,
-} from "cooking-temperature/icons"
-
-// Get a category icon
-const poultryIcon = CATEGORY_ICONS["poultry"]
-// Returns: "data:image/svg+xml;base64,..."
-
-// Get a specific ingredient icon
-const salmonIcon = INGREDIENT_ICONS["salmon_fillet"]
-
-// Use the helper function (falls back to category icon if no specific icon exists)
-const icon = getIcon("salmon_fillet", "seafood_fish")
-```
-
-### Available Icon Exports
-
-| Export | Description |
-|--------|-------------|
-| `CATEGORY_ICONS` | Icons for each food category (poultry, beef, pork, seafood_fish, seafood_shellfish, egg, vegetable, grain) |
-| `POULTRY_ICONS` | Chicken breast, thigh, whole chicken, turkey breast |
-| `BEEF_ICONS` | Ribeye steak, ground beef, beef roast |
-| `SEAFOOD_ICONS` | Salmon fillet, shrimp, cod fillet, tuna steak |
-| `EGG_ICONS` | Fried, boiled, scrambled, poached eggs |
-| `VEGETABLE_ICONS` | Broccoli, asparagus, potato, carrot |
-| `GRAIN_ICONS` | White rice, pasta, quinoa |
-| `INGREDIENT_ICONS` | Combined export of all ingredient icons |
-| `getIcon(id, category?)` | Helper function that returns an icon by ID, with optional category fallback |
 
 ## License
 

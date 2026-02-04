@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.6] - 2025-02-04
+### Removed
+- Removed icons.
+
+### Added
+- Added search function.
+
 ## [1.0.5] - 2025-01-28
 ### Changed
 - Updated icons to use microsoft icons for better consistency.
