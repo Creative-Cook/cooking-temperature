@@ -113,25 +113,38 @@ type CookingMethod =
 
 ### Search & Lookup Functions
 
-#### `search(query: string, options?: { category?: IngredientCategory; limit?: number }): CookingTemperatureEntry[]`
+#### `search(query: string, options?: { category?: IngredientCategory; limit?: number }): SearchResult[]`
 
-Search for ingredients by name or alias. Returns results sorted by relevance (exact matches first, then name matches, then alias matches).
+Search for ingredients by name or alias. Returns flattened results with one entry per cooking method, sorted by relevance.
 ```typescript
-// Basic search - returns all matches
+type SearchResult = {
+  category: IngredientCategory
+  ingredientId: string
+  ingredientName: string
+  portionDescription: string
+  cookingMethod: string
+}
+
+// Empty search - returns first 10 results (useful for initial display)
+const defaultResults = search("")
+// Returns: first 10 ingredient/method combinations
+
+// Basic search - flattened by cooking method
 const results = search("chicken")
-// Returns: [Chicken Breast, Chicken Thigh, ...]
+// Returns: [
+//   { category: 'poultry', ingredientId: 'chicken_breast_boneless', ingredientName: 'Chicken Breast...', portionDescription: 'standard (6-8 oz...)', cookingMethod: 'oven_bake' },
+//   { category: 'poultry', ingredientId: 'chicken_breast_boneless', ingredientName: 'Chicken Breast...', portionDescription: 'standard (6-8 oz...)', cookingMethod: 'pan_sear' },
+//   ...
+// ]
 
 // Filter by category
 const fishResults = search("fillet", { category: "seafood_fish" })
-// Returns: [Salmon Fillet, Cod Fillet]
 
-// Limit results (useful for autocomplete)
+// Custom limit (default is 10)
 const topResults = search("sal", { limit: 5 })
-// Returns: up to 5 matching entries
 
 // Combine options
 const porkChops = search("chop", { category: "pork", limit: 3 })
-// Returns: up to 3 pork entries matching "chop"
 ```
 
 #### `findByName(query: string): CookingTemperatureEntry | undefined`

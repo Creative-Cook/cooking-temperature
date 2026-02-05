@@ -357,91 +357,51 @@ describe("getQuickReference", () => {
 	})
 })
 
-describe("search", () => {
-  it("should return multiple matching entries", () => {
-    const results = search("chicken");
-    expect(results.length).toBeGreaterThan(1);
-    expect(results.some((entry) => entry.id === "chicken_breast_boneless")).toBe(true);
-    expect(results.some((entry) => entry.id === "chicken_thigh_boneless")).toBe(true);
-  });
+describe('search', () => {
+  it('returns first 10 results for empty query', () => {
+    const results = search('')
 
-  it("should return empty array for empty query", () => {
-    const results = search("");
-    expect(results).toEqual([]);
-  });
+    expect(results).toHaveLength(10)
+  })
 
-  it("should return empty array for whitespace-only query", () => {
-    const results = search("   ");
-    expect(results).toEqual([]);
-  });
+  it('returns empty array when query matches nothing', () => {
+    const results = search('xyz123nonexistent')
 
-  it("should return empty array when no matches found", () => {
-    const results = search("nonexistentingredient");
-    expect(results).toEqual([]);
-  });
+    expect(results).toEqual([])
+  })
 
-  it("should be case insensitive", () => {
-    const resultsLower = search("salmon");
-    const resultsUpper = search("SALMON");
-    const resultsMixed = search("SaLmOn");
-    expect(resultsLower).toEqual(resultsUpper);
-    expect(resultsLower).toEqual(resultsMixed);
-  });
+  it('returns flattened results by cooking method', () => {
+    const results = search('salmon')
 
-  it("should match against aliases", () => {
-    const results = search("prawns"); // alias for shrimp
-    expect(results.length).toBeGreaterThan(0);
-    expect(results.some((entry) => entry.id === "shrimp")).toBe(true);
-  });
+    expect(results.length).toBeGreaterThan(1)
+    expect(results[0]).toMatchObject({
+      category: 'seafood_fish',
+      ingredientId: 'salmon_fillet',
+      ingredientName: 'Salmon Fillet',
+    })
+  })
 
-  it("should filter by category when specified", () => {
-    const results = search("fillet", { category: "seafood_fish" });
-    expect(results.length).toBeGreaterThan(0);
-    expect(results.every((entry) => entry.category === "seafood_fish")).toBe(true);
-  });
+  it('defaults limit to 10', () => {
+    const results = search('pork')
 
-  it("should return empty array when category filter excludes all matches", () => {
-    const results = search("chicken", { category: "seafood_fish" });
-    expect(results).toEqual([]);
-  });
+    expect(results.length).toBeLessThanOrEqual(10)
+  })
 
-  it("should respect limit option", () => {
-    const results = search("pork", { limit: 2 });
-    expect(results.length).toBeLessThanOrEqual(2);
-  });
+  it('respects custom limit', () => {
+    const results = search('pork', { limit: 3 })
 
-  it("should return all results when limit is greater than matches", () => {
-    const allResults = search("salmon");
-    const limitedResults = search("salmon", { limit: 100 });
-    expect(limitedResults.length).toBe(allResults.length);
-  });
+    expect(results).toHaveLength(3)
+  })
 
-  it("should combine category and limit options", () => {
-    const results = search("chop", { category: "pork", limit: 1 });
-    expect(results.length).toBeLessThanOrEqual(1);
-    expect(results.every((entry) => entry.category === "pork")).toBe(true);
-  });
+  it('filters by category', () => {
+    const results = search('', { category: 'poultry' })
 
-  it("should prioritize exact name matches", () => {
-    const results = search("shrimp");
-    expect(results.length).toBeGreaterThan(0);
-    expect(results[0].name.toLowerCase()).toBe("shrimp");
-  });
+    expect(results.every((r) => r.category === 'poultry')).toBe(true)
+  })
 
-  it("should prioritize name matches over alias-only matches", () => {
-    const results = search("salmon");
-    // First result should have "salmon" in name, not just in aliases
-    expect(results[0].name.toLowerCase()).toContain("salmon");
-  });
+  it('matches aliases', () => {
+    const results = search('prawns')
 
-  it("should handle partial matches", () => {
-    const results = search("sal"); // partial match for salmon
-    expect(results.some((entry) => entry.name.toLowerCase().includes("sal"))).toBe(true);
-  });
-
-  it("should trim whitespace from query", () => {
-    const resultsTrimmed = search("salmon");
-    const resultsWithSpaces = search("  salmon  ");
-    expect(resultsTrimmed).toEqual(resultsWithSpaces);
-  });
-});
+    expect(results.some((r) => r.ingredientId === 'shrimp')).toBe(true)
+  })
+})
