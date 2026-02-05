@@ -245,64 +245,74 @@ export const getQuickReference = (
 	}
 }
 
+export type SearchResult = {
+  category: IngredientCategory
+  ingredientId: string
+  ingredientName: string
+  portionDescription: string
+  cookingMethod: string
+}
+
 export const search = (
   query: string,
   options?: {
-    category?: IngredientCategory;
-    limit?: number;
+    category?: IngredientCategory
+    limit?: number
   }
-): CookingTemperatureEntry[] => {
-  const normalizedQuery = query.toLowerCase().trim();
+): SearchResult[] => {
+  const normalizedQuery = query.toLowerCase().trim()
+  const limit = options?.limit ?? 10
 
-  if (!normalizedQuery) return [];
+  let matchingEntries = ALL_ENTRIES
 
-  let results = ALL_ENTRIES.filter(
-    (entry) =>
-      entry.name.toLowerCase().includes(normalizedQuery) ||
-      entry.aliases.some((alias) =>
-        alias.toLowerCase().includes(normalizedQuery)
-      )
-  );
+  // Filter by query if provided
+  if (normalizedQuery) {
+    matchingEntries = matchingEntries.filter(
+      (entry) =>
+        entry.name.toLowerCase().includes(normalizedQuery) ||
+        entry.aliases.some((alias) =>
+          alias.toLowerCase().includes(normalizedQuery)
+        )
+    )
+  }
 
   // Filter by category if specified
   if (options?.category) {
-    results = results.filter((entry) => entry.category === options.category);
+    matchingEntries = matchingEntries.filter(
+      (entry) => entry.category === options.category
+    )
   }
 
-  // Sort by relevance: exact matches first, then name matches, then alias matches
-  results.sort((entryA, entryB) => {
-    const aNameLower = entryA.name.toLowerCase();
-    const bNameLower = entryB.name.toLowerCase();
+  // Flatten to one result per cooking method
+  const results: SearchResult[] = matchingEntries.flatMap((entry) =>
+    entry.cookingInstructions.flatMap((instruction) =>
+      instruction.methods.map((method) => ({
+        category: entry.category,
+        ingredientId: entry.id,
+        ingredientName: entry.name,
+        portionDescription: instruction.portionDescription,
+        cookingMethod: method.method,
+      }))
+    )
+  )
 
-    // Exact name match gets highest priority
-    const aExact = aNameLower === normalizedQuery;
-    const bExact = bNameLower === normalizedQuery;
-    if (aExact && !bExact) return -1;
-    if (bExact && !aExact) return 1;
+  // Sort by relevance only if there's a query
+  if (normalizedQuery) {
+    results.sort((a, b) => {
+      const aName = a.ingredientName.toLowerCase()
+      const bName = b.ingredientName.toLowerCase()
 
-    // Name starts with query
-    const aStarts = aNameLower.startsWith(normalizedQuery);
-    const bStarts = bNameLower.startsWith(normalizedQuery);
-    if (aStarts && !bStarts) return -1;
-    if (bStarts && !aStarts) return 1;
+      if (aName === normalizedQuery && bName !== normalizedQuery) return -1
+      if (bName === normalizedQuery && aName !== normalizedQuery) return 1
+      if (aName.startsWith(normalizedQuery) && !bName.startsWith(normalizedQuery)) return -1
+      if (bName.startsWith(normalizedQuery) && !aName.startsWith(normalizedQuery)) return 1
 
-    // Name contains query (vs only alias contains)
-    const aNameContains = aNameLower.includes(normalizedQuery);
-    const bNameContains = bNameLower.includes(normalizedQuery);
-    if (aNameContains && !bNameContains) return -1;
-    if (bNameContains && !aNameContains) return 1;
-
-    // Alphabetical as tiebreaker
-    return aNameLower.localeCompare(bNameLower);
-  });
-
-  // Apply limit if specified
-  if (options?.limit && options.limit > 0) {
-    return results.slice(0, options.limit);
+      return aName.localeCompare(bName)
+    })
   }
 
-  return results;
-};
+  return results.slice(0, limit)
+}
 
 // Re-export types
 export * from "./types"

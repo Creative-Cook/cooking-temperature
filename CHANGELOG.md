@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.7] - 2025-02-05
+### Changed
+- Updated search function to use a more efficient algorithm for better performance.
+
 ## [1.0.6] - 2025-02-04
 ### Removed
 - Removed icons.
